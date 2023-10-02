@@ -9,7 +9,10 @@
 #define IRON 'I'
 #define ENEMY 'E'
 #define PLAYER 'X'
-#define TARGET_SCORE 10  // Adjust as needed
+//Adjust as needed
+#define TARGET_SCORE 10
+#define IRON_AMT 12
+#define ENEMY_AMT 8
 
 // Function to initialize the game grid
 char** initializeGrid(int width, int height);
@@ -35,7 +38,7 @@ int main() {
     // Seed the random number generator
     srand(time(NULL));
 
-    //scatterObjects(grid);
+    scatterObjects(grid);
 
     renderGrid(grid, score); //testing only!
     /*while (!isGameOver(score)) {
@@ -92,9 +95,41 @@ char** initializeGrid(int width, int height) {
     return grid;
 }
 
+// Function to randomly scatter iron and enemies on the grid
+void scatterObjects(char** grid)
+{
+    // Scatter Iron ('I') on the grid
+    for(int ironLoop = 0; ironLoop < IRON_AMT; ironLoop++)
+    {
+        // Generate random coordinates within the grid
+        int x, y;
+        do {
+            x = rand() % GRID_SIZE_X;
+            y = rand() % GRID_SIZE_Y;
+        } while (grid[y][x] != ' ');
+
+        // Ensure the cell is empty, add iron
+        grid[y][x] = IRON;
+    }
+
+    // Scatter Enemies ('E') on the grid
+    for(int enemyLoop = 0; enemyLoop < ENEMY_AMT; enemyLoop++)
+    {
+        // Generate random coordinates within the grid
+        int x, y;
+        do {
+            x = rand() % GRID_SIZE_X;
+            y = rand() % GRID_SIZE_Y;
+        } while (grid[y][x] != ' ');
+
+        // Ensure the cell is empty, add enemy
+        grid[y][x] = ENEMY;
+    }
+}
+
 // Function to display the game grid & state
 void renderGrid(char** grid, int gridScore) {
-    printf("H E A V Y I R O N\n"); // Title
+    printf("H E A V Y I R O N !\n"); // Title
 
     // Grid
     for (int row = 0; row < GRID_SIZE_X; row++) {
@@ -107,5 +142,5 @@ void renderGrid(char** grid, int gridScore) {
     printf("Score: %d out of %d\n", gridScore, TARGET_SCORE); // Score
 }
 
-// Implement scatterObjects, movePlayer, and isGameOver functions
+// Implement movePlayer, and isGameOver functions
 // ...
