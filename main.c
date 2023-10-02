@@ -17,17 +17,17 @@ char** initializeGrid(int width, int height);
 // Function to randomly scatter iron and enemies on the grid
 void scatterObjects(char** grid);
 
-// Function to display the game grid
-void renderGrid(char** grid);
+// Function to display the game grid & state
+void renderGrid(char** grid, int gridScore);
 
 // Function to move the player and update game state
-void movePlayer(char** grid, int* playerX, int* playerY, int* score);
+void movePlayer(char** grid, int* playerX, int* playerY, int* playerScore);
 
 // Function to check for game over conditions
 int isGameOver(int score);
 
 int main() {
-    //char** grid = initializeGrid(GRID_SIZE_X, GRID_SIZE_Y);
+    char** grid = initializeGrid(GRID_SIZE_X, GRID_SIZE_Y);
     int playerX = 0;
     int playerY = 0;
     int score = 0;
@@ -37,10 +37,11 @@ int main() {
 
     //scatterObjects(grid);
 
+    renderGrid(grid, score); //testing only!
     /*while (!isGameOver(score)) {
         //system("clear");  // Use "cls" for Windows
-        //renderGrid(grid);
-        movePlayer(grid, &playerX, &playerY, &score);
+        //renderGrid(grid, score);
+        //movePlayer(grid, &playerX, &playerY, &score);
     }*/
 
     if (score >= TARGET_SCORE) {
@@ -51,13 +52,60 @@ int main() {
 
     // Clean up memory
     for (int i = 0; i < GRID_SIZE_X; i++) {
-        //free(grid[i]);
+        free(grid[i]);
     }
-    //free(grid);
+    free(grid);
 
     return 0;
 }
 
-// Implement initializeGrid, scatterObjects, renderGrid, movePlayer, and isGameOver functions
-// ...
+// Function to initialize the game grid
+char** initializeGrid(int width, int height) {
+    // Allocate memory for the grid 
+    // Note: Using sizeof(char) for easy type flexibility if needed later.
+    // Since sizeof(char) is 1, could be omitted for minor efficiency.
 
+    char** grid = (char**)malloc(width * sizeof(char*));
+    if (grid == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE); // Handle allocation failure
+    }
+
+    for (int row = 0; row < width; row++) {
+        grid[row] = (char*)malloc((height + 1) * sizeof(char)); // +1 for the null terminator
+        if (grid[row] == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE); // Handle allocation failure
+        }
+    }
+
+    // Initialize the grid elements as blank spaces
+    for (int row = 0; row < width; row++) {
+        for (int column = 0; column < height; column++) {
+            *(grid[row] + column) = ' ';
+        }
+    }
+
+    // Player starts in the middle
+    *(grid[(height - 1) / 2] + ((width - 1) / 2)) = 'P';
+
+    return grid;
+}
+
+// Function to display the game grid & state
+void renderGrid(char** grid, int gridScore) {
+    printf("H E A V Y I R O N\n"); // Title
+
+    // Grid
+    for (int row = 0; row < GRID_SIZE_X; row++) {
+        for (int column = 0; column < GRID_SIZE_Y; column++) {
+            printf("%c ", *(grid[row] + column * sizeof(char)));
+        }
+        puts(""); // End of row
+    }
+
+    printf("Score: %d out of %d\n", gridScore, TARGET_SCORE); // Score
+}
+
+// Implement scatterObjects, movePlayer, and isGameOver functions
+// ...
