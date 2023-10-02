@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <conio.h>  // for getch() in Windows, or use ncurses for Unix-like systems
 #include <time.h>
+#include <ctype.h>
 
 // Define constants for grid dimensions and game states
 #define GRID_SIZE_X 10
@@ -9,6 +10,8 @@
 #define IRON 'I'
 #define ENEMY 'E'
 #define PLAYER 'X'
+#define PLAYER_START_X 4
+#define PLAYER_START_Y 4
 //Adjust as needed
 #define TARGET_SCORE 10
 #define IRON_AMT 12
@@ -31,8 +34,8 @@ int isGameOver(int score);
 
 int main() {
     char** grid = initializeGrid(GRID_SIZE_X, GRID_SIZE_Y);
-    int playerX = 0;
-    int playerY = 0;
+    int playerX = PLAYER_START_X;
+    int playerY = PLAYER_START_Y;
     int score = 0;
 
     // Seed the random number generator
@@ -40,12 +43,12 @@ int main() {
 
     scatterObjects(grid);
 
-    renderGrid(grid, score); //testing only!
-    /*while (!isGameOver(score)) {
-        //system("clear");  // Use "cls" for Windows
-        //renderGrid(grid, score);
-        //movePlayer(grid, &playerX, &playerY, &score);
-    }*/
+    //while (!isGameOver(score)) {
+    while(1){
+        printf("\e[1;1H\e[2J"); //clear the screen
+        renderGrid(grid, score);
+        movePlayer(grid, &playerX, &playerY, &score);
+    }
 
     if (score >= TARGET_SCORE) {
         printf("Congratulations! You won Heavy Iron Quest!\n");
@@ -90,7 +93,7 @@ char** initializeGrid(int width, int height) {
     }
 
     // Player starts in the middle
-    *(grid[(height - 1) / 2] + ((width - 1) / 2)) = 'P';
+    grid[PLAYER_START_Y][PLAYER_START_X] = 'P';
 
     return grid;
 }
@@ -140,6 +143,72 @@ void renderGrid(char** grid, int gridScore) {
     }
 
     printf("Score: %d out of %d\n", gridScore, TARGET_SCORE); // Score
+}
+
+// Function to move the player and update game state
+void movePlayer(char** grid, int* playerX, int* playerY, int* playerScore) {
+    //get input
+    printf("Enter a direction (W/A/S/D): ");
+    char moveDirection = getchar();
+    while (getchar() != '\n'); // Clear input buffer
+    moveDirection = tolower(moveDirection); //from ctype.h, allows upper or lower input
+
+    //Save current pos for clearing after boundary check
+    int oldX = *playerX;
+    int oldY = *playerY;
+
+    // Calculate the new position based on the input
+    switch (moveDirection)
+    {
+        case 'w':
+            (*playerY)--;
+            break;
+        
+        case 'a':
+            (*playerX)--;
+            break;
+        
+        case 's':
+            (*playerY)++;
+            break;
+
+        case 'd':
+            (*playerX)++;
+            break;
+        
+        default:
+            printf("Invalid input. Please enter W, A, S, or D.\n");
+            break;
+    }
+
+    // Check if the new position is within the bounds of the grid
+    if(0 <= *playerX && *playerX < GRID_SIZE_X && 0 <= *playerY && *playerY < GRID_SIZE_Y)
+    {
+        
+        // Check what's in the new position
+        char foundSomething = grid[*playerY][*playerX];
+            // Player collects iron
+            if(foundSomething == 'I')
+                (*playerScore)++;
+            // Player encounters an enemy (game over)
+            if(foundSomething == 'E')
+            {
+                printf("The enemy got you! GAME OVER\n");
+                exit(0);
+            }
+    
+        // Update the grid and player's position
+        grid[oldY][oldX] = ' ';
+        grid[*playerY][*playerX] = 'P';
+    }
+    
+    // Player tried to move out of bounds
+    else 
+    {
+        *playerX = oldX;
+        *playerY = oldY;
+        printf("Out of bounds. Please come back!\n");
+    }
 }
 
 // Implement movePlayer, and isGameOver functions
