@@ -42,18 +42,11 @@ int main() {
     srand(time(NULL));
 
     scatterObjects(grid);
-
-    //while (!isGameOver(score)) {
-    while(1){
-        printf("\e[1;1H\e[2J"); //clear the screen
+    
+    while (isGameOver(score)) {
+        printf("\e[2J\e[H"); //clear the screen
         renderGrid(grid, score);
         movePlayer(grid, &playerX, &playerY, &score);
-    }
-
-    if (score >= TARGET_SCORE) {
-        printf("Congratulations! You won Heavy Iron Quest!\n");
-    } else {
-        printf("Game over. You encountered an enemy.\n");
     }
 
     // Clean up memory
@@ -207,9 +200,16 @@ void movePlayer(char** grid, int* playerX, int* playerY, int* playerScore) {
     {
         *playerX = oldX;
         *playerY = oldY;
-        printf("Out of bounds. Please come back!\n");
     }
 }
 
-// Implement movePlayer, and isGameOver functions
-// ...
+// Function to check for game over conditions
+int isGameOver(int score)
+{
+    if (score < TARGET_SCORE) return 1;
+    else 
+    {
+        printf("YOU WIN! Thanks for playing Heavy Iron Quest!");
+        return 0;
+    }
+}
